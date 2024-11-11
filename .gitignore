@@ -38,3 +38,9 @@ codegen/
 # Ignore .DS_Store files (macOS system files)
 .DS_Store
 ._*
+
+# Ignore aux project files (for now)
+/resources/
+
+# Ignore documentation (for now)
+/docs/
