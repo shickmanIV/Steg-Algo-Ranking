@@ -35,3 +35,6 @@ codegen/
 # buildtool cache folder
 .buildtool/
 
+# Ignore .DS_Store files (macOS system files)
+.DS_Store
+._*
