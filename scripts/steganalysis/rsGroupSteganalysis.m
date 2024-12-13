@@ -38,6 +38,23 @@ S_ = 0; % Singular flipped
 numBlocksRow = floor(rows / blockSize);
 numBlocksCol = floor(cols / blockSize);
 
+% Ensure flipPattern is valid and resizeable
+if nargin < 3 || isempty(flipPattern)
+    error('flipPattern is required and cannot be empty.');
+end
+if ~ismatrix(flipPattern)
+    error('flipPattern must be a 2D matrix.');
+end
+
+% Resize flipPattern to block size if necessary
+[fpRows, fpCols] = size(flipPattern);
+if fpRows > blockSize || fpCols > blockSize
+    error('flipPattern dimensions exceed the block size. Please provide a smaller pattern.');
+end
+
+flipPatternResized = repmat(flipPattern, ceil(blockSize / fpRows), ceil(blockSize / fpCols));
+flipPatternResized = flipPatternResized(1:blockSize, 1:blockSize);
+
 % Iterate over all blocks
 for i = 1:numBlocksRow
     for j = 1:numBlocksCol
@@ -52,29 +69,16 @@ for i = 1:numBlocksRow
         R = R + calculateSmoothness(block);
         S = S + calculateSmoothness(block, 'singular');
 
-        % Check the size of flipPattern
-        disp(['Size of block: ', num2str(size(block))]); 
-        disp(['Size of flipPattern: ', num2str(size(flipPattern))]);
-
-        % Resize flipPattern to match block size if necessary
-        if isequal(size(flipPattern), size(block))
-            flipPatternResized = flipPattern;
-        else
-            flipPatternResized = repmat(flipPattern, blockSize, blockSize);
-        end
-        
-        % Apply the flipping pattern (example: adding the resized pattern)
-        flippedBlock = block + flipPatternResized;
+        % Apply the flipping pattern
+        flippedBlock = mod(block + flipPatternResized, 256); % Ensure values are within valid range
         R_ = R_ + calculateSmoothness(flippedBlock);
         S_ = S_ + calculateSmoothness(flippedBlock, 'singular');
     end
 end
 
-
-
 % Estimate embedding rate
-if (R + S) == 0 || (R_ + S_) == 0
-    error('Invalid RS values: division by zero.');
+if (R - S + R_ - S_) == 0
+    error('Invalid RS values: division by zero. Check the input image or parameters.');
 end
 embeddingRate = (S_ - S) / (R - S + R_ - S_);
 
@@ -97,22 +101,22 @@ if nargin < 2 || strcmp(type, 'regular')
     % Default: Regular smoothness
     diffBlockRow = diff(block, 1, 1);  % Differences along rows
     diffBlockCol = diff(block, 1, 2);  % Differences along columns
-    
+
     % Pad the smaller dimension with zeros to match sizes
     diffBlockRow = [diffBlockRow; zeros(1, size(block, 2))];  % Pad rows to match original block size
     diffBlockCol = [diffBlockCol, zeros(size(block, 1), 1)];  % Pad columns to match original block size
-    
+
     % Calculate regular smoothness
     diffValue = diffBlockRow.^2 + diffBlockCol.^2;
 else
     % Singular smoothness
     diffBlockRow = diff(block, 1, 1);  % Differences along rows
     diffBlockCol = diff(block, 1, 2);  % Differences along columns
-    
+
     % Pad the smaller dimension with zeros to match sizes
     diffBlockRow = [diffBlockRow; zeros(1, size(block, 2))];  % Pad rows to match original block size
     diffBlockCol = [diffBlockCol, zeros(size(block, 1), 1)];  % Pad columns to match original block size
-    
+
     % Calculate singular smoothness
     diffValue = abs(diffBlockRow) + abs(diffBlockCol);
 end

@@ -26,28 +26,28 @@ for i = 1:length(imagePaths)
     % LSB Embedding
     lsbImg = lsb_embed(img, message);  % Pass message as second argument
     psnrLsb = calculate_psnr(img, lsbImg);
-    %[embeddingRateLsb, rsValuesLsb] = rsGroupSteganalysis(imagePaths{i}, blockSize, flipPattern);
+    [embeddingRateLsb, rsValuesLsb] = rsGroupSteganalysis(imagePaths{i}, blockSize, flipPattern);
     
     % PVD Embedding
     pvdImg = pvd_embed(img, message);  % Pass message as second argument
     psnrPvd = calculate_psnr(img, pvdImg);
-    %[embeddingRatePvd, rsValuesPvd] = rsGroupSteganalysis(imagePaths{i}, blockSize, flipPattern);
+    [embeddingRatePvd, rsValuesPvd] = rsGroupSteganalysis(imagePaths{i}, blockSize, flipPattern);
     
     % Store results
     psnrResults(i).image = imagePaths{i};
     psnrResults(i).lsb = psnrLsb;
     psnrResults(i).pvd = psnrPvd;
     
-    %steganalysisResults(i).image = imagePaths{i};
-    %steganalysisResults(i).lsb.embeddingRate = embeddingRateLsb;
-    %steganalysisResults(i).lsb.RSValues = rsValuesLsb;
-    %steganalysisResults(i).pvd.embeddingRate = embeddingRatePvd;
-    %steganalysisResults(i).pvd.RSValues = rsValuesPvd;
+    steganalysisResults(i).image = imagePaths{i};
+    steganalysisResults(i).lsb.embeddingRate = embeddingRateLsb;
+    steganalysisResults(i).lsb.RSValues = rsValuesLsb;
+    steganalysisResults(i).pvd.embeddingRate = embeddingRatePvd;
+    steganalysisResults(i).pvd.RSValues = rsValuesPvd;
 end
 
 % Display results
 disp('PSNR Results:');
 disp(struct2table(psnrResults));
 
-%disp('Steganalysis Results:');
-%disp(struct2table(steganalysisResults));
+disp('Steganalysis Results:');
+disp(struct2table(steganalysisResults));
