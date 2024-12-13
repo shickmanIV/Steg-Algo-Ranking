@@ -13,7 +13,8 @@ function [embeddingRate, RSValues] = rsGroupSteganalysis(imagePath, blockSize, f
 % Read the input image
 image = imread(imagePath);
 if size(image, 3) ~= 1
-    error('Input image must be grayscale.');
+    image = rgb2gray(image);
+    disp('Converted image to grayscale.');
 end
 
 % Ensure the image is double for processing
@@ -51,12 +52,25 @@ for i = 1:numBlocksRow
         R = R + calculateSmoothness(block);
         S = S + calculateSmoothness(block, 'singular');
 
-        % Apply the flipping pattern
-        flippedBlock = block + flipPattern;
+        % Check the size of flipPattern
+        disp(['Size of block: ', num2str(size(block))]); 
+        disp(['Size of flipPattern: ', num2str(size(flipPattern))]);
+
+        % Resize flipPattern to match block size if necessary
+        if isequal(size(flipPattern), size(block))
+            flipPatternResized = flipPattern;
+        else
+            flipPatternResized = repmat(flipPattern, blockSize, blockSize);
+        end
+        
+        % Apply the flipping pattern (example: adding the resized pattern)
+        flippedBlock = block + flipPatternResized;
         R_ = R_ + calculateSmoothness(flippedBlock);
         S_ = S_ + calculateSmoothness(flippedBlock, 'singular');
     end
 end
+
+
 
 % Estimate embedding rate
 if (R + S) == 0 || (R_ + S_) == 0
@@ -81,16 +95,28 @@ function smoothness = calculateSmoothness(block, type)
 
 if nargin < 2 || strcmp(type, 'regular')
     % Default: Regular smoothness
-    diffBlockRow = diff(block, 1, 1);
-    diffBlockCol = diff(block, 1, 2);
-    diff = diffBlockRow.^2 + diffBlockCol.^2;
+    diffBlockRow = diff(block, 1, 1);  % Differences along rows
+    diffBlockCol = diff(block, 1, 2);  % Differences along columns
+    
+    % Pad the smaller dimension with zeros to match sizes
+    diffBlockRow = [diffBlockRow; zeros(1, size(block, 2))];  % Pad rows to match original block size
+    diffBlockCol = [diffBlockCol, zeros(size(block, 1), 1)];  % Pad columns to match original block size
+    
+    % Calculate regular smoothness
+    diffValue = diffBlockRow.^2 + diffBlockCol.^2;
 else
     % Singular smoothness
-    diffBlockRow = diff(block, 1, 1);
-    diffBlockCol = diff(block, 1, 2);
-    diff = abs(diffBlockRow) + abs(diffBlockCol);
+    diffBlockRow = diff(block, 1, 1);  % Differences along rows
+    diffBlockCol = diff(block, 1, 2);  % Differences along columns
+    
+    % Pad the smaller dimension with zeros to match sizes
+    diffBlockRow = [diffBlockRow; zeros(1, size(block, 2))];  % Pad rows to match original block size
+    diffBlockCol = [diffBlockCol, zeros(size(block, 1), 1)];  % Pad columns to match original block size
+    
+    % Calculate singular smoothness
+    diffValue = abs(diffBlockRow) + abs(diffBlockCol);
 end
 
-smoothness = sum(diff(:));
+smoothness = sum(diffValue(:));  % Sum of all difference values
 
 end
