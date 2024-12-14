@@ -6,7 +6,7 @@ message = 'This is a secret message';  % Example message
 
 % Initialize output structures to hold results
 psnrResults = struct();
-steganalysisResults = struct();
+rsGroupResults = struct();
 
 % Define blockSize and flipPattern (adjust as needed)
 blockSize = 8;  % Example block size
@@ -24,13 +24,13 @@ for i = 1:length(imagePaths)
     end
     
     % LSB Embedding
-    lsbImg = lsb_embed(img, message);  % Pass message as second argument
-    psnrLsb = calculate_psnr(img, lsbImg);
+    lsbImg = lsb_embed(img, message);
+    psnrLsb = computePSNR(img, lsbImg);
     [embeddingRateLsb, rsValuesLsb] = rsGroupSteganalysis(imagePaths{i}, blockSize, flipPattern);
     
     % PVD Embedding
     pvdImg = pvd_embed(img, message);  % Pass message as second argument
-    psnrPvd = calculate_psnr(img, pvdImg);
+    psnrPvd = computePSNR(img, pvdImg);
     [embeddingRatePvd, rsValuesPvd] = rsGroupSteganalysis(imagePaths{i}, blockSize, flipPattern);
     
     % Store results
@@ -38,16 +38,16 @@ for i = 1:length(imagePaths)
     psnrResults(i).lsb = psnrLsb;
     psnrResults(i).pvd = psnrPvd;
     
-    steganalysisResults(i).image = imagePaths{i};
-    steganalysisResults(i).lsb.embeddingRate = embeddingRateLsb;
-    steganalysisResults(i).lsb.RSValues = rsValuesLsb;
-    steganalysisResults(i).pvd.embeddingRate = embeddingRatePvd;
-    steganalysisResults(i).pvd.RSValues = rsValuesPvd;
+    rsGroupResults(i).image = imagePaths{i};
+    rsGroupResults(i).lsb = embeddingRateLsb;
+    %rsGroupResults(i).lsb.RSValues = rsValuesLsb;
+    rsGroupResults(i).pvd = embeddingRatePvd;
+    %rsGroupResults(i).pvd.RSValues = rsValuesPvd;
 end
 
 % Display results
 disp('PSNR Results:');
 disp(struct2table(psnrResults));
 
-disp('Steganalysis Results:');
-disp(struct2table(steganalysisResults));
+disp('Regular-Singular Group Results:');
+disp(struct2table(rsGroupResults));

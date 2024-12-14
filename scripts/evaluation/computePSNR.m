@@ -1,5 +1,5 @@
-function psnr_val = calculate_psnr(original, modified)
-    % calculate_psnr computes the Peak Signal-to-Noise Ratio (PSNR) between
+function psnr_val = computePSNR(original, modified)
+    % computePSNR computes the Peak Signal-to-Noise Ratio (PSNR) between
     % two images: the original and the modified (encoded) image.
     %
     % Parameters:
