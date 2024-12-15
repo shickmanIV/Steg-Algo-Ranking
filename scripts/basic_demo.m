@@ -1,53 +1,37 @@
-% Set of image paths (replace with your own list of image file paths)
-imagePaths = {imageFilePath}; 
 
-% Set the message to embed in the cover image (adjust as needed)
+
+% Set the message to embed in the cover images
 message = 'This is a secret message';  % Example message
 
-% Initialize output structures to hold results
-psnrResults = struct();
-rsGroupResults = struct();
+results = struct();
 
-% Define blockSize and flipPattern (adjust as needed)
-blockSize = 8;  % Example block size
-flipPattern = 'default';  % Example flip pattern (adjust as needed)
+for idx = 1:numel(imageIndices)
+    i = imageIndices(idx);
 
-% Loop through the images and process with LSB and PVD
-for i = 1:length(imagePaths)
     % Read the image
-    img = imread(imagePaths{i});
+    imgPath = getImagePath(i, projectRoot);
+    img = imread(imgPath);
 
-    % Ensure the image is grayscale (convert if necessary)
-    if size(img, 3) == 3  % If the image has 3 channels (RGB)
-        img = rgb2gray(img);  % Convert to grayscale
-        disp('Converted img to grayscale');
+    % Convert the image to grayscale if necessary
+    if size(img, 3) == 3
+        img = rgb2gray(img);
     end
-    
-    % LSB Embedding
-    lsbImg = lsb_embed(img, message);
-    psnrLsb = computePSNR(img, lsbImg);
-    [embeddingRateLsb, rsValuesLsb] = rsGroupSteganalysis(imagePaths{i}, blockSize, flipPattern);
-    
-    % PVD Embedding
-    pvdImg = pvd_embed(img, message);  % Pass message as second argument
-    psnrPvd = computePSNR(img, pvdImg);
-    [embeddingRatePvd, rsValuesPvd] = rsGroupSteganalysis(imagePaths{i}, blockSize, flipPattern);
-    
-    % Store results
-    psnrResults(i).image = imagePaths{i};
-    psnrResults(i).lsb = psnrLsb;
-    psnrResults(i).pvd = psnrPvd;
-    
-    rsGroupResults(i).image = imagePaths{i};
-    rsGroupResults(i).lsb = embeddingRateLsb;
-    %rsGroupResults(i).lsb.RSValues = rsValuesLsb;
-    rsGroupResults(i).pvd = embeddingRatePvd;
-    %rsGroupResults(i).pvd.RSValues = rsValuesPvd;
+
+    % Perform LSB steganography
+    lsb_img = lsb_embed(img, message);
+    [psnr_lsb, ssim_lsb, mse_lsb] = imperceptibilityMetrics(img, lsb_img);
+    results(2 * idx - 1).method = 'lsb'; % Explicit indexing for LSB
+    results(2 * idx - 1).imageIndex = i;
+    results(2 * idx - 1).psnr = psnr_lsb;
+    results(2 * idx - 1).ssimIndex = ssim_lsb;
+    results(2 * idx - 1).mse = mse_lsb;
+
+    % Perform PVD steganography
+    pvd_img = pvd_embed(img, message);
+    [psnr_pvd, ssim_pvd, mse_pvd] = imperceptibilityMetrics(img, pvd_img);
+    results(2 * idx).method = 'pvd'; % Explicit indexing for PVD
+    results(2 * idx).imageIndex = i;
+    results(2 * idx).psnr = psnr_pvd;
+    results(2 * idx).ssimIndex = ssim_pvd;
+    results(2 * idx).mse = mse_pvd;
 end
-
-% Display results
-disp('PSNR Results:');
-disp(struct2table(psnrResults));
-
-disp('Regular-Singular Group Results:');
-disp(struct2table(rsGroupResults));

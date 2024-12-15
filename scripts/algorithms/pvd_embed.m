@@ -75,7 +75,5 @@ function stego_img = pvd_embed(cover_img, message)
     % Display status
     if bin_index <= message_len
         warning('Message was truncated due to limited capacity.');
-    else
-        disp('Message successfully embedded using PVD.');
     end
 end

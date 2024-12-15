@@ -40,16 +40,13 @@ function [psnr,ssimIndex,mse] = imperceptibilityMetrics(original,modified)
     psnr = 10 * log10(max_val^2 / mse);
 
     % Default parameters for SSIM calculation
-    windowSize = 11; % Size of the Gaussian window
-    K = [0.01 0.03]; % Stability constants for luminance and contrast
-    L = 1; % Dynamic range of pixel values (0 to 1 for normalized images)'
+    %windowSize = 11; % Informational but not directly used in MATLAB's ssim
+    %K = [0.01, 0.03]; % Stability constants for luminance and contrast (informational only)
+    L = 1; % Dynamic range of pixel values (0 to 1 for normalized images)
+
 
     % Compute SSIM using MATLAB's built-in function
-    ssimIndex = ssim(image1, image2, ...
-                     'DynamicRange', L, ...
-                     'Radius', floor(windowSize / 2), ...
-                     'K1', K(1), ...
-                     'K2', K(2));
+    ssimIndex = ssim(original, modified, 'DynamicRange', L);
 end
 
 
