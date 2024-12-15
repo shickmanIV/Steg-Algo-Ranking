@@ -12,7 +12,11 @@ filesExtension = '.jpg';
 
 % Loop through each given dataset
 for i = 1:length(datasetNames)
-    dirPath = fullfile(projectRoot, 'data/input/images/ALASKAv2', datasetNames{i});
+    
+    dirPath = fullfile(projectRoot, ...
+        'data/input/images/ALASKAv2', ...
+        datasetNames{i});
+    
     % If directory for this dataset does not exist, create one.
     if ~exist(dirPath, 'dir')
         mkdir(dirPath);
@@ -26,7 +30,8 @@ for i = 1:length(datasetNames)
         imagePath = fullfile(dirPath, imageName);
         % Only download if image file is missing.
         if ~exist(imagePath, 'file')
-            imageURL = sprintf('http://alaska.utt.fr/DATASETS/%s/%s', datasetNames{i}, imageName);
+            imageURL = sprintf('http://alaska.utt.fr/DATASETS/%s/%s', ...
+                datasetNames{i}, imageName);
         
             websave(fullfile(dirPath, imageName), imageURL);
             filesDownloaded = filesDownloaded + 1;
@@ -34,5 +39,6 @@ for i = 1:length(datasetNames)
             filesSkipped = filesSkipped + 1;
         end
     end
-    fprintf('%d images downloaded, %d skipped\n', filesDownloaded, filesSkipped);
+    fprintf('%d images downloaded, %d  skipped\n', ...
+        filesDownloaded, filesSkipped);
 end
